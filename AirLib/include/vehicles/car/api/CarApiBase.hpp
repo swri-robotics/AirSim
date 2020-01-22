@@ -11,10 +11,21 @@
 #include "sensors/SensorBase.hpp"
 #include "sensors/SensorCollection.hpp"
 #include "sensors/SensorFactory.hpp"
+#include "CarCommon.hpp"
+
+typedef msr::airlib::CarState CarState;
 
 namespace msr { namespace airlib {
 
 class CarApiBase : public VehicleApiBase  {
+
+  
+protected:
+  /************************* State APIs *********************************/
+  virtual Kinematics::State getKinematicsEstimated() const = 0;
+  virtual GeoPoint getGpsLocation() const = 0;
+  //  virtual const MultirotorApiParams& getMultirotorApiParams() const = 0;
+  
 public:
     struct CarControls {
         float throttle = 0; /* 1 to -1 */
@@ -49,22 +60,6 @@ public:
         }
     };
 
-    struct CarState {
-        float speed;
-        int gear;
-        float rpm;
-        float maxrpm;
-        bool handbrake;
-        Kinematics::State kinematics_estimated;
-        uint64_t timestamp;
-
-        CarState(float speed_val, int gear_val, float rpm_val, float maxrpm_val, bool handbrake_val, 
-            const Kinematics::State& kinematics_estimated_val, uint64_t timestamp_val)
-            : speed(speed_val), gear(gear_val), rpm(rpm_val), maxrpm(maxrpm_val), handbrake(handbrake_val), 
-              kinematics_estimated(kinematics_estimated_val), timestamp(timestamp_val)
-        {
-        }
-    };
 
 public:
 
@@ -101,6 +96,20 @@ public:
         return sensors_;
     }
 
+      /************* other short hands ************/
+    virtual Vector3r getPosition() const
+    {
+        return getKinematicsEstimated().pose.position;
+    }
+    virtual Vector3r getVelocity() const
+    {
+        return getKinematicsEstimated().twist.linear;
+    }
+    virtual Quaternionr getOrientation() const
+    {
+      return getKinematicsEstimated().pose.orientation;
+    }
+
     void initialize(const AirSimSettings::VehicleSetting* vehicle_setting, 
         std::shared_ptr<SensorFactory> sensor_factory, 
         const Kinematics::State& state, const Environment& environment)
@@ -127,7 +136,22 @@ public:
     }
 
     virtual void setCarControls(const CarControls& controls) = 0;
-    virtual CarState getCarState() const = 0;
+  //  virtual CarState getCarState() const = 0;
+      /************************* high level status APIs *********************************/
+  CarState getCarState() const
+    {
+        CarState state;
+        state.kinematics_estimated = getKinematicsEstimated();
+        //TODO: add GPS health, accuracy in API
+        state.gps_location = getGpsLocation();
+        state.timestamp = clock()->nowNanos();
+	//        state.landed_state = getLandedState();
+	// state.rc_data = getRCData();
+        //state.ready = isReady(state.ready_message);
+        //state.can_arm = canArm();
+        return state;
+    }
+
     virtual const CarApiBase::CarControls& getCarControls() const = 0;
 
     virtual ~CarApiBase() = default;
