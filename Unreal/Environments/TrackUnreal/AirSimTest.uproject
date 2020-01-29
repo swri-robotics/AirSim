@@ -1,0 +1,19 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "{1BB5C09A-310C-151F-0007-03D13D5D84AD}",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "AirSimTest",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "AirSim",
+			"Enabled": true
+		}
+	]
+}
