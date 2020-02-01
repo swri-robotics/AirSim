@@ -24,6 +24,7 @@ elif [ "$(uname)" == "Linux" ]; then
     ./GenerateProjectFiles.sh "$SCRIPT_DIR/AirSimTest.uproject"
     popd >/dev/null
 else
+
     echo "Not implemented"
     exit 1
 fi
