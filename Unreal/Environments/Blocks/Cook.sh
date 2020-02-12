@@ -24,7 +24,7 @@ elif [ "$(uname)" == "Linux" ]; then
     
     ./RunUAT.sh BuildCookRun -nocompile -nop4 \
    -project="$SCRIPT_DIR/Blocks.uproject" \
-   -cook -compressed -allmaps -stage -archive \
+   -cook -compressed -build -allmaps -stage -archive \
    -archivedirectory="$SCRIPT_DIR/" -package \
    -LinuxNoEditor -clientconfig=Development -ue4exe=UE4Editor -clean \
    -pak -targetplatform=Linux -utf8output

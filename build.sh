@@ -142,11 +142,6 @@ Unreal/Environments/Blocks/clean.sh
 mkdir -p Unreal/Environments/Blocks/Plugins
 rsync -a --delete Unreal/Plugins/AirSim Unreal/Environments/Blocks/Plugins
 
-# Update TrackUnreal project
-Unreal/Environments/TrackUnreal/clean.sh
-mkdir -p Unreal/Environments/TrackUnreal/Plugins
-rsync -a --delete Unreal/Plugins/AirSim Unreal/Environments/TrackUnreal/Plugins
-
 set +x
 
 echo ""
