@@ -12,7 +12,7 @@ namespace msr {  namespace airlib {
 //     ForwardOnly
 // };
 
-struct CarState {
+struct CarCommonState {
   float speed;
   int gear;
   float rpm;
@@ -25,11 +25,11 @@ struct CarState {
 
   //        MSGPACK_DEFINE_MAP(speed, gear, rpm, maxrpm, handbrake, kinematics_estimated, timestamp);
 
-  CarState()
+  CarCommonState()
   {}
 
 
-  CarState(float speed_val,
+  CarCommonState(float speed_val,
 	   int gear_val,
 	   float rpm_val,
 	   float maxrpm_val,
@@ -41,7 +41,7 @@ struct CarState {
   {
   }
   
-  CarState(float speed_val,
+  CarCommonState(float speed_val,
   	   int gear_val,
   	   float rpm_val,
   	   float maxrpm_val,
@@ -68,9 +68,9 @@ struct CarState {
 };
 
 
-    // CarState to() const
+    // CarCommonState to() const
     // {
-    //     return CarState(
+    //     return CarCommonState(
     //         speed, gear, rpm, maxrpm, handbrake, kinematics_estimated.to(), timestamp);
     // }
 
