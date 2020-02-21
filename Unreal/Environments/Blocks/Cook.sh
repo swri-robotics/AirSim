@@ -22,7 +22,7 @@ elif [ "$(uname)" == "Linux" ]; then
     # Call UnrealEngine shell scrpit
     pushd "$UnrealDir/Engine/Build/BatchFiles/" >/dev/null
     
-    ./RunUAT.sh BuildCookRun -nocompile -nop4 \
+    ./RunUAT.sh BuildCookRun -compile -nop4 \
    -project="$SCRIPT_DIR/Blocks.uproject" \
    -cook -compressed -build -allmaps -stage -archive \
    -archivedirectory="$SCRIPT_DIR/" -package \
