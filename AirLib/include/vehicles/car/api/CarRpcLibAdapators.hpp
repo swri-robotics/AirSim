@@ -13,6 +13,7 @@
 #include "common/common_utils/WindowsApisCommonPre.hpp"
 #include "rpc/msgpack.hpp"
 #include "common/common_utils/WindowsApisCommonPost.hpp"
+#include "vehicles/car/api/CarCommon.hpp"
 
 namespace msr { namespace airlib_rpclib {
 
@@ -50,33 +51,37 @@ public:
     };
 
     struct CarState {
-        float speed;
+      float speed;
         int gear;
         float rpm;
         float maxrpm;
         bool handbrake;
         KinematicsState kinematics_estimated;
+      CollisionInfo collision;
+        GeoPoint gps_location;
         uint64_t timestamp;
 
-        MSGPACK_DEFINE_MAP(speed, gear, rpm, maxrpm, handbrake, kinematics_estimated, timestamp);
-
+      MSGPACK_DEFINE_MAP(speed, gear, rpm, maxrpm, handbrake, kinematics_estimated, collision, gps_location, timestamp);
+      
         CarState()
         {}
 
-        CarState(const msr::airlib::CarApiBase::CarState& s)
+        CarState(const msr::airlib::CarState& s)
         {
-            speed = s.speed;
-            gear = s.gear;
-            rpm = s.rpm;
-            maxrpm = s.maxrpm;
-            handbrake = s.handbrake;
-            timestamp = s.timestamp;
-            kinematics_estimated = s.kinematics_estimated;
+	  speed = s.speed;
+	  gear = s.gear;
+	  rpm = s.rpm;
+	  maxrpm = s.maxrpm;
+	  handbrake = s.handbrake;
+	  kinematics_estimated = s.kinematics_estimated;
+	  collision = s.collision;
+	  gps_location = s.gps_location;
+	  timestamp = s.timestamp;
         }
-        msr::airlib::CarApiBase::CarState to() const
+        msr::airlib::CarState to() const
         {
-            return msr::airlib::CarApiBase::CarState(
-                speed, gear, rpm, maxrpm, handbrake, kinematics_estimated.to(), timestamp);
+            return msr::airlib::CarState(
+					 speed, gear, rpm, maxrpm, handbrake, kinematics_estimated.to(), collision.to(), gps_location.to(), timestamp);
         }
     };
 };
