@@ -60,11 +60,10 @@ void CarRpcLibClient::setCarControls(const CarApiBase::CarControls& controls, co
         call("setCarControls", CarRpcLibAdapators::CarControls(controls), vehicle_name);
 }
 
-//CarApiBase::CarState CarRpcLibClient::getCarState(const std::string& vehicle_name)
-msr::airlib::CarState CarRpcLibClient::getCarState(const std::string& vehicle_name)
+CarApiBase::CarState CarRpcLibClient::getCarState(const std::string& vehicle_name)
 {
     return static_cast<rpc::client*>(getClient())->
-      call("getCarState", vehicle_name).as<CarRpcLibAdapators::CarState>().to();
+        call("getCarState", vehicle_name).as<CarRpcLibAdapators::CarState>().to();
 }
 CarApiBase::CarControls CarRpcLibClient::getCarControls(const std::string& vehicle_name)
 {

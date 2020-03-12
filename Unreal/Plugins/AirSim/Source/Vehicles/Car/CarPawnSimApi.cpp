@@ -66,21 +66,6 @@ void CarPawnSimApi::updateRenderedState(float dt)
     //TODO: do we need this for cars?
     if (getRemoteControlID() >= 0)
         vehicle_api_->setRCData(getRCData());
-
-    //move collision info from rendering engine to vehicle
-    const CollisionInfo& collision_info = getCollisionInfo();
-    phys_vehicle_->setCollisionInfo(collision_info);
-
-    // if (pending_pose_status_ == PendingPoseStatus::RenderStatePending) {
-    //     phys_vehicle_->setPose(pending_phys_pose_);
-    //     pending_pose_status_ = PendingPoseStatus::RenderPending;
-    // }
-        
-    //    last_phys_pose_ = phys_vehicle_->getPose();
-    
-    collision_response = phys_vehicle_->getCollisionResponseInfo();
-
-    
 }
 void CarPawnSimApi::updateRendering(float dt)
 {
@@ -153,17 +138,13 @@ void CarPawnSimApi::updateCarControls()
         current_controls_ = joystick_controls_;
     }
     else {
-        UAirBlueprintLib::LogMessageString("Control Mode MJB: ", "Keyboard", LogDebugLevel::Informational);
-	UAirBlueprintLib::LogMessageString("Throttle CMD: ", std::to_string(keyboard_controls_.throttle), LogDebugLevel::Informational);
-
+        UAirBlueprintLib::LogMessageString("Control Mode: ", "Keyboard", LogDebugLevel::Informational);
         current_controls_ = keyboard_controls_;
     }
 
     //if API-client control is not active then we route keyboard/joystick control to car
     if (!vehicle_api_->isApiControlEnabled()) {
         //all car controls from anywhere must be routed through API component
-      UAirBlueprintLib::LogMessageString("API Not Enabled: ", "ERROR", LogDebugLevel::Informational);
-
         vehicle_api_->setCarControls(current_controls_);
     }
     else {
