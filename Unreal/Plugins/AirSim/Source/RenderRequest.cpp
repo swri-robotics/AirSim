@@ -43,7 +43,7 @@ void RenderRequest::RenderThreadScreenshotTask(RenderRequest::RenderResult &resu
     uint32 height = fast_cap_texture->GetSizeY();
     uint32 stride;
     auto *src = (const unsigned char*)RHILockTexture2D(fast_cap_texture, 0, RLM_ReadOnly, stride, false); // needs to be on render thread
-    
+
     result.time_stamp = msr::airlib::ClockFactory::get()->nowNanos();
     result.pixels = buffer_pool_->GetBufferExactSize(height*stride);
     result.stride = stride;
@@ -52,7 +52,7 @@ void RenderRequest::RenderThreadScreenshotTask(RenderRequest::RenderResult &resu
 
     if (src)
 		FMemory::BigBlockMemcpy(latest_result_.pixels->data(), src, height * stride);
-    
+
     RHIUnlockTexture2D(fast_cap_texture, 0, false);
 
     fast_cap_done_ = true;
