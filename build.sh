@@ -83,9 +83,9 @@ rsync -a --delete MavLinkCom/include AirLib/deps/MavLinkCom
 rsync -a --delete AirLib Unreal/Plugins/AirSim/Source
 
 # Update Blocks project
-Unreal/Environments/Blocks/clean.sh
-mkdir -p Unreal/Environments/Blocks/Plugins
-rsync -a --delete Unreal/Plugins/AirSim Unreal/Environments/Blocks/Plugins
+# Unreal/Environments/Blocks/clean.sh
+# mkdir -p Unreal/Environments/Blocks/Plugins
+# rsync -a --delete Unreal/Plugins/AirSim Unreal/Environments/Blocks/Plugins
 
 set +x
 
