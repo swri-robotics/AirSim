@@ -344,7 +344,10 @@ void RpcLibServerBase::start(bool block, std::size_t thread_count)
 
 void RpcLibServerBase::stop()
 {
-    pimpl_->stop();
+    if (pimpl_)
+    {
+        pimpl_->stop();
+    }
 }
 
 void* RpcLibServerBase::getServer() const

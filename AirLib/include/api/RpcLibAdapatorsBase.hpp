@@ -336,15 +336,17 @@ public:
 
         MSGPACK_DEFINE_MAP(camera_name, image_type, pixels_as_float, compress);
 
-        ImageRequest()
+        ImageRequest() :
+            pixels_as_float(false),
+            compress(false)
         {}
 
-        ImageRequest(const msr::airlib::ImageCaptureBase::ImageRequest& s)
+        ImageRequest(const msr::airlib::ImageCaptureBase::ImageRequest& s) :
+            camera_name(s.camera_name),
+            image_type(s.image_type),
+            pixels_as_float(s.pixels_as_float),
+            compress(s.compress)
         {
-            camera_name = s.camera_name;
-            image_type = s.image_type;
-            pixels_as_float = s.pixels_as_float;
-            compress = s.compress;
         }
 
         msr::airlib::ImageCaptureBase::ImageRequest to() const
@@ -395,31 +397,37 @@ public:
         MSGPACK_DEFINE_MAP(image_data_uint8, image_data_float, camera_position, camera_name,
             camera_orientation, time_stamp, message, pixels_as_float, compress, width, height, image_type);
 
-        ImageResponse()
+        ImageResponse() :
+            pixels_as_float(false),
+            compress(false),
+            width(0),
+            height(0)
         {}
 
-        ImageResponse(const msr::airlib::ImageCaptureBase::ImageResponse& s)
+        ImageResponse(const msr::airlib::ImageCaptureBase::ImageResponse& s) :
+            camera_name(s.camera_name),
+            camera_position(s.camera_position),
+            camera_orientation(s.camera_orientation),
+            time_stamp(s.time_stamp),
+            message(s.message),
+            pixels_as_float(s.pixels_as_float),
+            compress(s.compress),
+            width(s.width),
+            height(s.height),
+            image_type(s.image_type)
         {
-            pixels_as_float = s.pixels_as_float;
-
-            image_data_uint8.insert(image_data_uint8.begin(), s.image_data_uint8->front(), s.image_data_uint8->back());
+            if (s.image_data_uint8) {
+                image_data_uint8.assign(s.image_data_uint8->begin(), s.image_data_uint8->end());
+            }
             image_data_float = s.image_data_float;
 
             //TODO: remove bug workaround for https://github.com/rpclib/rpclib/issues/152
-            if (image_data_uint8.size() == 0)
+            if (image_data_uint8.size() == 0) {
                 image_data_uint8.push_back(0);
-            if (image_data_float.size() == 0)
+            }
+            if (image_data_float.size() == 0) {
                 image_data_float.push_back(0);
-
-            camera_name = s.camera_name;
-            camera_position = Vector3r(s.camera_position);
-            camera_orientation = Quaternionr(s.camera_orientation);
-            time_stamp = s.time_stamp;
-            message = s.message;
-            compress = s.compress;
-            width = s.width;
-            height = s.height;
-            image_type = s.image_type;
+            }
         }
 
         msr::airlib::ImageCaptureBase::ImageResponse to() const
@@ -427,12 +435,7 @@ public:
             msr::airlib::ImageCaptureBase::ImageResponse d;
 
             d.pixels_as_float = pixels_as_float;
-
-            if (!pixels_as_float)
-                d.image_data_uint8->insert(d.image_data_uint8->begin(), image_data_uint8.front(), image_data_uint8.back());
-            else
-                d.image_data_float = image_data_float;
-
+            d.image_data_uint8->assign(image_data_uint8.begin(), image_data_uint8.end());
             d.camera_name = camera_name;
             d.camera_position = camera_position.to();
             d.camera_orientation = camera_orientation.to();
@@ -450,8 +453,9 @@ public:
             const std::vector<ImageResponse>& response_adapter
         ) {
             std::vector<msr::airlib::ImageCaptureBase::ImageResponse> response;
-            for (const auto& item : response_adapter)
+            for (const auto& item : response_adapter) {
                 response.push_back(item.to());
+            }
 
             return response;
         }
@@ -459,8 +463,9 @@ public:
             const std::vector<msr::airlib::ImageCaptureBase::ImageResponse>& response
         ) {
             std::vector<ImageResponse> response_adapter;
-            for (const auto& item : response)
+            for (const auto& item : response) {
                 response_adapter.push_back(ImageResponse(item));
+            }
 
             return response_adapter;
         }

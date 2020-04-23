@@ -59,7 +59,9 @@ public: //types
         int width = 0, height = 0;
         ImageType image_type;
 
-        ImageResponse() : image_data_uint8(nullptr), camera_name(""), camera_position(Vector3r::Zero()), camera_orientation(Quaternionr::Identity()), time_stamp(0), message(""), pixels_as_float(false), compress(true), width(0), height(0), image_type(ImageType::Scene) {}
+        ImageResponse() : image_data_uint8(nullptr), camera_name(""), camera_position(Vector3r::Zero()), camera_orientation(Quaternionr::Identity()), time_stamp(0), message(""), pixels_as_float(false), compress(true), width(0), height(0), image_type(ImageType::Scene) {
+            image_data_uint8 = std::unique_ptr<vector<uint8_t>, std::function<void(vector<uint8_t>*)>>(new std::vector<uint8_t>(), std::bind(&ImageResponse::CopyDeleter, this, std::placeholders::_1));
+        }
 
         ImageResponse(const ImageResponse& other)
         {

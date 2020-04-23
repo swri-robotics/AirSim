@@ -188,8 +188,12 @@ APawn* PawnSimApi::getPawn()
 
 void PawnSimApi::getImages(const std::vector<ImageCaptureBase::ImageRequest>& requests, std::vector<ImageCaptureBase::ImageResponse> &responses) const
 {
-	for (int i = 0; i < requests.size() && i < responses.size(); ++i)
+    if (responses.size() != requests.size()) {
+        responses.resize(requests.size());
+    }
+	for (int i = 0; i < requests.size(); ++i) {
 		getImage(requests[i], responses[i]);
+    }
 }
 
 void PawnSimApi::getImage(const ImageCaptureBase::ImageRequest& request, ImageCaptureBase::ImageResponse &response) const

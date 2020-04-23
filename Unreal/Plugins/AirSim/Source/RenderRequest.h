@@ -7,6 +7,7 @@
 #include "Engine/GameViewportClient.h"
 #include <memory>
 #include "common/Common.hpp"
+#include "Core/Public/PixelFormat.h"
 
 class BufferPool;
 
@@ -29,6 +30,7 @@ public:
         int width;
         int height;
         int stride;
+        EPixelFormat pixel_format;
         msr::airlib::TTimePoint time_stamp;
         std::unique_ptr<std::vector<uint8_t>, std::function<void(std::vector<uint8_t>*)>> pixels = nullptr;
     };
