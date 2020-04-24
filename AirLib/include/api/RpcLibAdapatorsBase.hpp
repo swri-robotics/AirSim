@@ -382,7 +382,6 @@ public:
     
     struct ImageResponse {
         std::vector<uint8_t> image_data_uint8;
-        std::vector<float> image_data_float;
 
         std::string camera_name;
         Vector3r camera_position;
@@ -394,7 +393,7 @@ public:
         int width, height;
         msr::airlib::ImageCaptureBase::ImageType image_type;
 
-        MSGPACK_DEFINE_MAP(image_data_uint8, image_data_float, camera_position, camera_name,
+        MSGPACK_DEFINE_MAP(image_data_uint8, camera_position, camera_name,
             camera_orientation, time_stamp, message, pixels_as_float, compress, width, height, image_type);
 
         ImageResponse() :
@@ -419,14 +418,10 @@ public:
             if (s.image_data_uint8) {
                 image_data_uint8.assign(s.image_data_uint8->begin(), s.image_data_uint8->end());
             }
-            image_data_float = s.image_data_float;
 
             //TODO: remove bug workaround for https://github.com/rpclib/rpclib/issues/152
             if (image_data_uint8.size() == 0) {
                 image_data_uint8.push_back(0);
-            }
-            if (image_data_float.size() == 0) {
-                image_data_float.push_back(0);
             }
         }
 

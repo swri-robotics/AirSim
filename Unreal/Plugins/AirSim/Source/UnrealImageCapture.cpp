@@ -19,7 +19,7 @@ UnrealImageCapture::~UnrealImageCapture()
 
 void UnrealImageCapture::getImages(const std::vector<msr::airlib::ImageCaptureBase::ImageRequest>& requests, std::vector<msr::airlib::ImageCaptureBase::ImageResponse>& responses) const
 {
-    UE_LOG(LogTemp, Warning, TEXT("getImages: %lu requests"), requests.size());
+    UE_LOG(LogTemp, Verbose, TEXT("getImages: %lu requests"), requests.size());
     if (responses.size() != requests.size()) {
         responses.resize(requests.size());
     }
@@ -35,6 +35,7 @@ void UnrealImageCapture::getImage(const msr::airlib::ImageCaptureBase::ImageRequ
 
 void UnrealImageCapture::getSceneCaptureImage(const std::string& camera_name, msr::airlib::ImageCaptureBase::ImageType image_type, msr::airlib::ImageCaptureBase::ImageResponse& response) const
 {
+    FString fcam_name(camera_name.c_str());
     APIPCamera* camera = cameras_->at(camera_name);
     camera->setCameraTypeEnabled(image_type, true);
 
@@ -47,14 +48,14 @@ void UnrealImageCapture::getSceneCaptureImage(const std::string& camera_name, ms
     render_request.FastScreenshot();
     auto stop = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>(stop - start);
-    UE_LOG(LogTemp, Warning, TEXT("getSceneCaptureImage duration: %lu"), duration.count());
+    UE_LOG(LogTemp, Verbose, TEXT("%s: getSceneCaptureImage: FastScreenshot duration: %lu"), *fcam_name, duration.count());
 
     int height = capture->TextureTarget->SizeY;
     int width = capture->TextureTarget->SizeX;
     int stride = render_request.latest_result_.stride;
     int bytes = render_request.latest_result_.pixels->size();
     int bytes_per_pixel = bytes / (height * width);
-    UE_LOG(LogTemp, Warning, TEXT("Image stats: H: %d  W: %d  bpp: %d  S: %d  bytes: %d  format: %d"), height, width, bytes_per_pixel, stride, bytes, render_request.latest_result_.pixel_format);
+    UE_LOG(LogTemp, Verbose, TEXT("%s: stats: H: %d  W: %d  bpp: %d  S: %d  bytes: %d  type: %d  px_format: %d"), *fcam_name, height, width, bytes_per_pixel, stride, bytes, image_type, textureTarget->GetFormat());
     int padded_width = stride / bytes_per_pixel;
 
     response.camera_name = camera_name;
@@ -62,17 +63,19 @@ void UnrealImageCapture::getSceneCaptureImage(const std::string& camera_name, ms
     response.width = padded_width;
     response.height = height;
     response.image_type = image_type;
-    switch (response.image_type)
+    response.image_data_uint8 = std::move(render_request.latest_result_.pixels);
+    switch(textureTarget->GetFormat())
     {
-        case EPixelFormat::PF_B8G8R8A8:
-            response.image_data_uint8 = std::move(render_request.latest_result_.pixels);
+        case PF_B8G8R8A8:
+            response.pixels_as_float = false;
             break;
-        case EPixelFormat::PF_FloatRGBA:
-            response.image_data_float = render_request.latest_result_.pixels;
+        case PF_FloatRGBA:
+            response.pixels_as_float = true;
             break;
         default:
-            UE_LOG(LogTemp, Warning, TEXT("Unexpected pixel format: %d", render_request.latest_result_.pixel_format);
+            UE_LOG(LogTemp, Warning, TEXT("Unexpected pixel format: %d"), textureTarget->GetFormat());
             break;
+
     }
 }
 

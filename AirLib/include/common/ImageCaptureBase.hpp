@@ -31,12 +31,12 @@ public: //types
         std::string camera_name;
         ImageCaptureBase::ImageType image_type = ImageCaptureBase::ImageType::Scene;
         bool pixels_as_float = false;
-        bool compress = true;
+        bool compress = false;
 
         ImageRequest()
         {}
 
-        ImageRequest(const std::string& camera_name_val, ImageCaptureBase::ImageType image_type_val, bool pixels_as_float_val = false, bool compress_val = true)
+        ImageRequest(const std::string& camera_name_val, ImageCaptureBase::ImageType image_type_val, bool pixels_as_float_val = false, bool compress_val = false)
         {
             camera_name = camera_name_val;
             image_type = image_type_val;
@@ -47,7 +47,7 @@ public: //types
 
     struct ImageResponse {
         std::unique_ptr<vector<uint8_t>, std::function<void(vector<uint8_t>*)>> image_data_uint8 = nullptr;
-        vector<float> image_data_float;
+        std::vector<float> image_data_float; // unused, only here for backward compatibility
 
         std::string camera_name;
         Vector3r camera_position = Vector3r::Zero();
@@ -55,11 +55,11 @@ public: //types
         TTimePoint time_stamp = 0;
         std::string message;
         bool pixels_as_float = false;
-        bool compress = true;
+        bool compress = false;
         int width = 0, height = 0;
         ImageType image_type;
 
-        ImageResponse() : image_data_uint8(nullptr), camera_name(""), camera_position(Vector3r::Zero()), camera_orientation(Quaternionr::Identity()), time_stamp(0), message(""), pixels_as_float(false), compress(true), width(0), height(0), image_type(ImageType::Scene) {
+        ImageResponse() : image_data_uint8(nullptr), camera_name(""), camera_position(Vector3r::Zero()), camera_orientation(Quaternionr::Identity()), time_stamp(0), message(""), pixels_as_float(false), compress(false), width(0), height(0), image_type(ImageType::Scene) {
             image_data_uint8 = std::unique_ptr<vector<uint8_t>, std::function<void(vector<uint8_t>*)>>(new std::vector<uint8_t>(), std::bind(&ImageResponse::CopyDeleter, this, std::placeholders::_1));
         }
 

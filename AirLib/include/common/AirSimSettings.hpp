@@ -178,27 +178,34 @@ public: //types
     };
 
     struct SensorSetting {
+        virtual ~SensorSetting() = default;
         SensorBase::SensorType sensor_type;
         std::string sensor_name;
         bool enabled;
     };
 
     struct BarometerSetting : SensorSetting {
+        virtual ~BarometerSetting() = default;
     };
 
     struct ImuSetting : SensorSetting {
+        virtual ~ImuSetting() = default;
     };
 
     struct GpsSetting : SensorSetting {
+        virtual ~GpsSetting() = default;
     };
 
     struct MagnetometerSetting : SensorSetting {
+        virtual ~MagnetometerSetting() = default;
     };
 
     struct DistanceSetting : SensorSetting {
+        virtual ~DistanceSetting() = default;
     };
 
     struct LidarSetting : SensorSetting {
+        virtual ~LidarSetting() = default;
 
         // shared defaults
         uint number_of_channels = 16;
@@ -219,6 +226,7 @@ public: //types
     };
 
     struct VehicleSetting {
+        virtual ~VehicleSetting() = default;
         //required
         std::string vehicle_name;
         std::string vehicle_type;
@@ -295,6 +303,7 @@ public: //types
     };
 
 	struct MavLinkVehicleSetting : public VehicleSetting {
+        virtual ~MavLinkVehicleSetting() = default;
 		MavLinkConnectionInfo connection_info;
 	};
 
