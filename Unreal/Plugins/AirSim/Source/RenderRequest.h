@@ -53,8 +53,7 @@ private:
     FDelegateHandle end_draw_handle_;
     std::function<void()> query_camera_pose_cb_;
 
-    BufferPool* buffer_pool_;
-
+    BufferPool* buffer_pool_ = nullptr;
 public:
     RenderRequest(BufferPool *buffer_pool);
     ~RenderRequest();
