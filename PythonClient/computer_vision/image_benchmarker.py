@@ -1,9 +1,12 @@
+#!/usr/bin/env python
 from argparse import ArgumentParser
+from msgpackrpc.error import RPCError
 import airsim
 import time
 import threading
 import numpy as np
 import cv2
+
 
 class ImageBenchmarker():
     def __init__(self, 
@@ -60,16 +63,20 @@ class ImageBenchmarker():
         self.image_benchmark_num_images += 1
         iter_start_time = time.time()
         request = [airsim.ImageRequest("fpv_cam", airsim.ImageType.Scene, False, False)]
-        response = self.airsim_client.simGetImages(request)
-        np_arr = np.frombuffer(response[0].image_data_uint8, dtype=np.uint8)
-        img_rgb = np_arr.reshape(response[0].height, 512, 4)
-        self.image_benchmark_total_time += time.time() - iter_start_time
-        avg_fps = 1.0 / ((self.image_benchmark_total_time) / float(self.image_benchmark_num_images))
-        print("result + {} avg_fps for {} num of images".format(avg_fps, self.image_benchmark_num_images))
-        # uncomment following lines to viz image
-        if self.viz_image_cv2:
-            cv2.imshow("img_rgb", img_rgb)
-            cv2.waitKey(1)
+        try:
+            response = self.airsim_client.simGetImages(request)
+            np_arr = np.frombuffer(response[0].image_data_uint8, dtype=np.uint8)
+            img_rgb = np_arr.reshape(response[0].height, response[0].width, 4)
+            self.image_benchmark_total_time += time.time() - iter_start_time
+            avg_fps = 1.0 / ((self.image_benchmark_total_time) / float(self.image_benchmark_num_images))
+            print("result + {} avg_fps for {} num of images".format(avg_fps, self.image_benchmark_num_images))
+            # uncomment following lines to viz image
+            if self.viz_image_cv2:
+                cv2.imshow("img_rgb", img_rgb)
+                cv2.waitKey(1)
+        except RPCError as e:
+            print("%s" % str(e))
+            print("Are your camera name & vehicle name correct?")
 
 def main(args):
     baseline_racer = ImageBenchmarker(img_benchmark_type=args.img_benchmark_type, viz_image_cv2=args.viz_image_cv2)
@@ -86,3 +93,4 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     main(args)
+
