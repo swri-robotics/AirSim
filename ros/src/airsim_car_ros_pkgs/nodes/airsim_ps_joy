@@ -1,0 +1,95 @@
+#!/usr/bin/env python
+import rospy
+import threading
+
+import sensor_msgs
+import sensor_msgs.msg
+import airsim_car_ros_pkgs.msg._CarCmd
+
+class JoystickToAirsim(object):
+    def __init__(self):
+        self.lock = threading.Lock()
+
+        self.last_forward_btn = 0
+        self.last_reverse_btn = 0
+        self.last_park_btn = 0
+        self.last_mode_btn = 0
+        self.car_msg = airsim_car_ros_pkgs.msg.CarCmd()
+
+        update_rate_hz = rospy.get_param('~update_rate_hz', 10.0)
+
+        self.forward_btn_index = rospy.get_param('forward_button_index', 2) # triangle
+        self.reverse_btn_index = rospy.get_param('reverse_button_index', 0) # cross
+        self.brake_btn_index = rospy.get_param('brake_btn_index', 5) # right trigger
+
+        self.car_pub = rospy.Publisher(
+            'airsim_node/PhysXCar/car_cmd_body_frame',								# need to find out what actually to put here
+            airsim_car_ros_pkgs.msg.CarCmd,
+            queue_size=0)
+
+        self.joy_sub = rospy.Subscriber(
+            'joy',
+            sensor_msgs.msg.Joy,
+            self.handle_joy)
+
+        self.joy_msg = None
+
+        self.update_timer = rospy.Timer(
+            rospy.Duration(1.0/update_rate_hz),
+            self.handle_update_timer)
+
+    def run(self):
+        rospy.spin()
+
+    def handle_joy(self, msg):
+        with self.lock:
+            self.joy_msg = msg
+
+    def handle_update_timer(self, ignored):
+        with self.lock:
+            joy = self.joy_msg
+
+        if joy is None:
+            return
+
+        # now = rospy.Time.now()
+
+        self.car_msg.steering = -joy.axes[0]
+        
+        forward_btn = joy.buttons[self.forward_btn_index]
+        reverse_btn = joy.buttons[self.reverse_btn_index]
+        brake_btn = joy.buttons[self.brake_btn_index]
+
+        u = joy.axes[4]
+
+        # send throttle command
+        if abs(u) > 0.0:
+            self.car_msg.throttle = u
+            self.car_msg.brake = 0.0
+        else:
+            self.car_msg.throttle = 0.0
+            self.car_msg.brake = u
+
+        # select gear (forward or reverse)
+        if forward_btn == 1 and reverse_btn == 0:
+            self.car_msg.manual_gear = 0
+            self.car_msg.is_manual_gear = False
+            self.car_msg.gear_immediate = True
+        elif reverse_btn == 1 and forward_btn == 0:
+            self.car_msg.manual_gear = -1
+            self.car_msg.is_manual_gear = True
+            self.car_msg.gear_immediate = True
+
+        # handbrake
+        if brake_btn == 0:
+            self.car_msg.brake = 0.0
+        else:
+            self.car_msg.throttle = 0.0
+            self.car_msg.brake = 2.0
+
+        self.car_pub.publish(self.car_msg)
+
+if __name__ == '__main__':
+    rospy.init_node('joystick_to_airsim')
+    node = JoystickToAirsim()
+    node.run()

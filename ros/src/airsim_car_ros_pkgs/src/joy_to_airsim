@@ -1,0 +1,77 @@
+#!/usr/bin/env python
+import rospy
+import threading
+
+import sensor_msgs
+import sensor_msgs.msg
+import CarCmd.msg as car
+
+class JoystickToAirsim(object):
+	def __init__(self):
+		self.lock = threading.Lock()
+
+		self.last_forward_btn = 0
+		self.last_reverse_btn = 0
+		self.last_park_btn = 0
+
+		update_rate_hz = rospy.get_param('~update_rate_hz', 10.0)
+
+		self.forward_btn_index = rospy.get_param('forward_button_index', 12) # triangle
+		self.reverse_btn_index = rospy.get_param('reverse_button_index', 14) # cross
+		self.park_btn_index = rospy.get_param('park_button_index', 15) # square
+
+		self.car_pub = rospy.Publisher(
+			'car_topic',								# need to find out what actually to put here
+			car.Float64,
+			queue_size=0)
+
+		self.joy_sub = rospy.Subscriber(
+			'joy',
+			sensor_msgs.msg.joy,
+			self.handle_joy)
+
+		self.joy_msg = None
+
+		self.update_timer = rospy.Timer(
+			rospy.Duration(1.0/update_rate_hz),
+			self.handle_update_timer)
+
+	def run(self):
+		rospy.spin()
+
+	def handle_joy(self, msg):
+		with self.lock:
+			self.joy_msg = msg
+
+	def handle_update_timer(self, ignored):
+		with self.lock:
+			joy = self.joy_msg
+
+		if joy is None:
+			return
+
+		now = rospy.Time.now()
+
+		car_msg = car.msg.Float64()
+		car_msg.header.stamp = now
+		car_msg.value = (1-joy.axes[2])/2.0
+		self.car.publish(msg)
+
+		u = joy.axes[1]
+		if u > 0.0:
+			car_msg.throttle = abs(u)
+			car_msg.brake = 0.0
+		else:
+			car_msg.throttle = 0.0
+			car_msg.brake = abs(u)
+
+		self.car.publish(car_msg)
+
+		forward_btn = joy.buttons[self.forward_btn_index]
+		reverse_btn = joy.buttons[self.reverse_btn_index]
+		park_btn = joy.buttons[self.park_btn_index]
+
+if __name__ == '__main__':
+	rospy.init_node('joystick_to_airsim')
+	node = JoyStickToAirsim()
+	node.run()
