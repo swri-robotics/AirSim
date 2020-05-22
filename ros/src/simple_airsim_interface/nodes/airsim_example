@@ -1,0 +1,168 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# *****************************************************************************
+#
+# Copyright (c) 2020, Southwest Research Institute® (SwRI®)
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in the
+#       documentation and/or other materials provided with the distribution.
+#     * Neither the name of Southwest Research Institute® (SwRI®) nor the
+#       names of its contributors may be used to endorse or promote products
+#       derived from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+# DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+# ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# *****************************************************************************
+
+# Python module with core ROS functionality
+import rospy
+
+# This is the OpenCV bridge, which is useful for converting ROS-formatted
+# camera data to and from OpenCV types
+from cv_bridge import CvBridge
+
+# These are all of the messages we will publish and subscribe to. They all have
+# the structure <package_name>.msg import <message_type>
+from std_msgs.msg import String
+from sensor_msgs.msg import Image
+from sensor_msgs.msg import PointCloud2
+
+
+class AirSimExample(object):
+    # In the class subscriber we will do several important things, such as
+    # subscribing to topics, like sensor data, that we will process, and publish
+    # data, like vehicle control commands, in response to the data
+    def __init__(self):
+        # This is an object for converting the ROS sensor data to an OpenCV
+        # format
+        self.opencv_bridge = CvBridge()
+
+        # Debugging variables for counting how many images of each type we
+        # have received
+        self.lidar_one_count = 0
+        self.lidar_two_count = 0
+        self.image_count = 0
+
+        # Publisher for the gear command
+        self.gear_pub = rospy.Publisher('/gear_command', String, queue_size=2)
+
+        # This is a subscriber to one of the lidars. The first argument is the
+        # name of the topic, the second is the type of data we expect on the
+        # topic, and the last is a callback method for processing the data
+        self.lidar_one_sub = rospy.Subscriber(
+                "/airsim_node/PhysXCar/lidar/VLP16_1",
+                PointCloud2,
+                self.lidar_one_callback)
+
+        # This is a subscriber to one of the lidars. The first argument is the
+        # name of the topic, the second is the type of data we expect on the
+        # topic, and the last is a callback method for processing the data
+        self.lidar_two_sub = rospy.Subscriber(
+                "/airsim_node/PhysXCar/lidar/VLP16_2",
+                PointCloud2,
+                self.lidar_one_callback)
+
+        # This is a subscriber to one of the cameras. The first argument is the
+        # name of the topic, the second is the type of data we expect on the
+        # topic, and the last is a callback method for processing the data
+        self.camera_sub = rospy.Subscriber(
+                "/airsim_node/PhysXCar/front_left_bumblebee/Scene",
+                Image,
+                self.image_callback)
+
+        # This is how fast our start() method will run, in hertz
+        self.loop_rate = rospy.Rate(10)
+
+    # Callback function that is invoked when data on the first lidar topic is
+    # received
+    def lidar_one_callback(self, msg):
+        # For now, just print a debugging message. We could process the data
+        # here and publish a message in response, save the data into a class
+        # variable for later processing, or do something else
+        rospy.logdebug("In lidar one callback")
+        self.lidar_one_count += 1
+
+    # Callback function that is invoked when data on the second lidar topic is
+    # received
+    def lidar_two_callback(self, msg):
+        # For now, just print a debugging message. We could process the data
+        # here and publish a message in response, save the data into a class
+        # variable for later processing, or do something else
+        rospy.logdebug("In lidar two callback")
+        self.lidar_two_count += 1
+
+    # Callback function for processing camera data
+    def image_callback(self, msg):
+        # Here, we publish a debugging message, and convert the ROS sensor
+        # message into an OpenCV image type. We could then do something with
+        # that message either in the callback, or by saving it off to a class
+        # variable to process in another method
+        rospy.logdebug("In camera callback")
+
+        # This converts the ROS sensor message to an OpenCV type image. We
+        # can then use OpenCV to manipulate the image, or save it off to 
+        # work on later
+        opencv_image = self.opencv_bridge.imgmsg_to_cv2(msg)
+        self.image_count += 1
+
+    def start(self):
+        rospy.logdebug('In start() method')
+
+        # This keeps processing data until the ROS system is shutdown
+        while not rospy.is_shutdown():
+            rospy.logdebug('Spinning main processing loop')
+            rospy.logdebug('We received {} messages on the first lidar'.format(self.lidar_one_count))
+            rospy.logdebug('We received {} messages on the second lidar'.format(self.lidar_two_count))
+            rospy.logdebug('We received {} messages from the camera'.format(self.image_count))
+
+            # Publish a message to put the car into forward gear 
+            self.gear_pub.publish(String("forward"))
+
+            # This causes the procesisng loop to sleep at the desired rate.
+            # This tries to account for the time spent processing data inside
+            # the loop, so that the loop runs at almost exactly the commanded
+            # rate
+            self.loop_rate.sleep()
+
+
+if __name__ == '__main__':
+    try:
+        # Create a node named 'AirSim_Example'. By setting the 
+        # anonymous parameter to True, a random number will be added to
+        # the node name. This is not strictly necessary here because we
+        # will only create one instance of this node, but is useful in
+        # cases where we create many instances of this node type in a ROS
+        # system, and want each node to have a unique name. For example, if
+        # this was a driver for a camera on a vehicle with multiple cameras,
+        # the anonymous parameter would ensure each driver node has a unique
+        # name
+        #
+        # We also set the logging level to DEBUG so that verbose debugging
+        # information is printed
+        rospy.init_node('AirSim_Example', anonymous=True, log_level=rospy.DEBUG)
+
+        # Create an instance of the class that interfaces to the ROS system and
+        # does work
+        example = AirSimExample()
+
+        # Now call the start() method of the node to start processing data
+        example.start()
+
+    except rospy.ROSInterruptException:
+        pass
