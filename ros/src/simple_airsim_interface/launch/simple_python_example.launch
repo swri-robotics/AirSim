@@ -1,0 +1,7 @@
+<launch>
+  <!-- Basic Airsim system -->
+  <include file="$(find airsim_car_ros_pkgs)/launch/airsim_node.launch"/>
+
+  <!-- Our example node -->
+  <node name="python_example" pkg="simple_airsim_interface" type="airsim_example" />
+</launch>
