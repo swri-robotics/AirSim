@@ -1,0 +1,19 @@
+<package format="2">
+  <name>simple_airsim_interface</name>
+  <version>0.0.1</version>
+  <description>
+    This is a simple example of how to interact with AirSim
+  </description>
+  <maintainer email="david.anthony@swri.org">David Anthony</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>cv_bridge</depend>
+  <depend>image_transport</depend>
+  <depend>roscpp</depend>
+  <depend>rospy</depend>
+  <depend>sensor_msgs</depend>
+  <depend>std_msgs</depend>
+
+</package>
