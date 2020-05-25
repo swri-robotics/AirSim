@@ -5,7 +5,7 @@ project(airsim_car_ros_pkgs)
 if(DEFINED ENV{AIRSIM_ROOT})
   set(AIRSIM_ROOT $ENV{AIRSIM_ROOT})
 else()
-  set(AIRSIM_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../AirSim)
+  set(AIRSIM_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../../../AirSim)
 endif()
 
 
