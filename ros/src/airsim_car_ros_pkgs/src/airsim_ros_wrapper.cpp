@@ -563,21 +563,9 @@ void AirsimROSWrapper::drone_state_timer_cb(const ros::TimerEvent& event)
                     car_ros.curr_odom_ned.pose.pose.position.y);
           car_ros.curr_odom_ned.pose.pose.position.z *= -1.0;
 
-          //std::swap(car_ros.curr_odom_ned.twist.twist.linear.x,
-          //          car_ros.curr_odom_ned.twist.twist.linear.y);
-          //car_ros.curr_odom_ned.twist.twist.linear.z *= -1.0;
-
-          //auto linear = car_ros.curr_odom_ned.twist.twist.linear;
-
-          //car_ros.curr_odom_ned.twist.twist.linear.x = std::sqrt(linear.x*linear.x + linear.y*linear.y);
-          car_ros.curr_odom_ned.twist.twist.linear.x -= -56.8999977112;
-          //car_ros.curr_odom_ned.twist.twist.linear.y = 0;
-          car_ros.curr_odom_ned.twist.twist.linear.y -= 1.0;
-
-          auto linear = car_ros.curr_odom_ned.twist.twist.linear;
-          car_ros.curr_odom_ned.twist.twist.linear.x =
-            std::sqrt(linear.x * linear.x + linear.y * linear.y) * speed_calibration_;
-          //car_ros.curr_odom_ned.twist.twist.linear.x *= -1.0;
+          std::swap(car_ros.curr_odom_ned.twist.twist.linear.x,
+            car_ros.curr_odom_ned.twist.twist.linear.y);
+          car_ros.curr_odom_ned.twist.twist.linear.z *= -1.0;
         }
 
         // publish to ROS!  
