@@ -416,7 +416,8 @@ public:
             image_type(s.image_type)
         {
             if (s.image_data_uint8) {
-                image_data_uint8.assign(s.image_data_uint8->begin(), s.image_data_uint8->end());
+              image_data_uint8.resize(s.image_data_uint8->size());
+              std::copy(s.image_data_uint8->begin(), s.image_data_uint8->end(), image_data_uint8.begin());
             }
 
             //TODO: remove bug workaround for https://github.com/rpclib/rpclib/issues/152
@@ -430,7 +431,9 @@ public:
             msr::airlib::ImageCaptureBase::ImageResponse d;
 
             d.pixels_as_float = pixels_as_float;
-            d.image_data_uint8->assign(image_data_uint8.begin(), image_data_uint8.end());
+            d.image_data_uint8 = std::make_shared<std::vector<uint8_t>>();
+            d.image_data_uint8->resize(image_data_uint8.size());
+            std::copy(image_data_uint8.begin(), image_data_uint8.end(), d.image_data_uint8->begin());
             d.camera_name = camera_name;
             d.camera_position = camera_position.to();
             d.camera_orientation = camera_orientation.to();

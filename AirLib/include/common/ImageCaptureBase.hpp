@@ -46,7 +46,7 @@ public: //types
     };
 
     struct ImageResponse {
-        std::unique_ptr<vector<uint8_t>, std::function<void(vector<uint8_t>*)>> image_data_uint8 = nullptr;
+        std::shared_ptr<std::vector<uint8_t>> image_data_uint8;
         std::vector<float> image_data_float; // unused, only here for backward compatibility
 
         std::string camera_name;
@@ -59,13 +59,12 @@ public: //types
         int width = 0, height = 0;
         ImageType image_type;
 
-        ImageResponse() : image_data_uint8(nullptr), camera_name(""), camera_position(Vector3r::Zero()), camera_orientation(Quaternionr::Identity()), time_stamp(0), message(""), pixels_as_float(false), compress(false), width(0), height(0), image_type(ImageType::Scene) {
-            image_data_uint8 = std::unique_ptr<vector<uint8_t>, std::function<void(vector<uint8_t>*)>>(new std::vector<uint8_t>(), std::bind(&ImageResponse::CopyDeleter, this, std::placeholders::_1));
+        ImageResponse() : image_data_uint8(std::make_shared<std::vector<uint8_t>>()), camera_name(""), camera_position(Vector3r::Zero()), camera_orientation(Quaternionr::Identity()), time_stamp(0), message(""), pixels_as_float(false), compress(false), width(0), height(0), image_type(ImageType::Scene) {
         }
 
         ImageResponse(const ImageResponse& other)
         {
-            image_data_uint8 = std::unique_ptr<vector<uint8_t>, std::function<void(vector<uint8_t>*)>>(other.image_data_uint8.get(), std::bind(&ImageResponse::CopyDeleter, this, std::placeholders::_1));
+            image_data_uint8 = other.image_data_uint8;
             camera_name = other.camera_name;
             camera_position = other.camera_position;
             camera_orientation = other.camera_orientation;
@@ -80,7 +79,7 @@ public: //types
 
         ImageResponse& operator=(const ImageResponse& other)
         {
-            image_data_uint8 = std::unique_ptr<vector<uint8_t>, std::function<void(vector<uint8_t>*)>>(other.image_data_uint8.get(), std::bind(&ImageResponse::CopyDeleter, this, std::placeholders::_1));
+            image_data_uint8 = other.image_data_uint8;
             camera_name = other.camera_name;
             camera_position = other.camera_position;
             camera_orientation = other.camera_orientation;
