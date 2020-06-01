@@ -10,6 +10,9 @@
 		<param name="update_airsim_control_every_n_sec" type="double" value="0.02" />
 		<param name="update_lidar_every_n_sec" type="double" value="0.05" />
 
-		<remap from="/airsim_node/PhysXCar/odom_local_ned" to="/odom"/>
-	</node>
+		<remap from="/airsim_node/PhysXCar/odom_local_enu" to="/odom"/>
+  </node>
+
+  <node pkg="tf" type="static_transform_publisher" name="ned_to_enu_pub" args="0 0 0 1.57 0 3.14 world_ned world_enu 100"/>
+
 </launch>
